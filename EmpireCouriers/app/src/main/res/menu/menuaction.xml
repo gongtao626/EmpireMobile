@@ -9,7 +9,7 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_light"
-        android:icon="@drawable/dark_ray"
+        android:icon="@drawable/flash_off"
         android:title=""
         app:showAsAction="always"/>
 

@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +47,7 @@ public class DriverLoginActivity extends AppCompatActivity {
     private Button light;
     private WebView browserTest;
     private ProgressDialog progressBar;
+    private Menu menu;
 
     //TO add
     private boolean isTorchOn = false;
@@ -214,6 +216,7 @@ public class DriverLoginActivity extends AppCompatActivity {
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menuaction, menu);
         return true;
@@ -240,7 +243,7 @@ public class DriverLoginActivity extends AppCompatActivity {
         } else {
 
             if(isTorchOn == true) {
-                barcodeView.setTorchOff();
+                //barcodeView.setTorchOff();
                 isTorchOn = false;
             }
             light.setVisibility(View.VISIBLE);
@@ -328,14 +331,13 @@ public class DriverLoginActivity extends AppCompatActivity {
 
             barcodeView.setVisibility(View.GONE);
             //barcodeView.stopDecoding();
-            //light.setVisibility(View.GONE);
+            menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.flash_off));
 
-            //lastText = "";//To allow scan again same label
-            //browserTest.setLayoutParams(WebView.LayoutParams(ViewGroup.LayoutParams.));
         } else {
 
             if (isTorchOn == true) {
                 barcodeView.setTorchOff();
+                menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.flash_off));
                 isTorchOn = false;
             }
             //light.setVisibility(View.VISIBLE);
@@ -367,9 +369,18 @@ public class DriverLoginActivity extends AppCompatActivity {
 
             isTorchOn = !isTorchOn;
             if(isTorchOn == true) {
+                if(barcodeView.getVisibility() == barcodeView.VISIBLE)
+                {
+                    menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.dark_ray));
+                }
                 barcodeView.setTorchOn();
             }else
             {
+                if(barcodeView.getVisibility() == barcodeView.VISIBLE)
+                {
+                    menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.flash_off));
+                }
+
                 barcodeView.setTorchOff();
             }
         }
