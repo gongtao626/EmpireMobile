@@ -18,11 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.ResultPoint;
@@ -46,7 +48,7 @@ public class DriverLoginActivity extends AppCompatActivity {
     private Button camera;
     private Button light;
     private WebView browserTest;
-    private ProgressDialog progressBar;
+    private ProgressBar pg1;
     private Menu menu;
 
     //TO add
@@ -105,10 +107,10 @@ public class DriverLoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_login);
 
-        camera = findViewById(R.id.cameraButton);
-        camera.setVisibility(View.GONE);
-        light = findViewById(R.id.lightButton);
-        light.setVisibility(View.GONE);
+        //camera = findViewById(R.id.cameraButton);
+        //camera.setVisibility(View.GONE);
+        //light = findViewById(R.id.lightButton);
+        //light.setVisibility(View.GONE);
         beepManager = new BeepManager(this);//
 
         barcodeView = (DecoratedBarcodeView) findViewById(R.id.barcode_scanner);
@@ -136,7 +138,8 @@ public class DriverLoginActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/driver/web?")){
-                    progressBar = ProgressDialog.show(DriverLoginActivity.this, "", "Loading...");
+                    Log.d("DRIVER", "Log in with existing credentials");
+
                 } else if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/web/driverlogout")){
                     if (barcodeView.getVisibility() == barcodeView.VISIBLE) {
 
@@ -146,9 +149,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                         barcodeView.setVisibility(View.GONE);
 
                     }
-                    light.setVisibility(View.GONE);
 
-                    camera.setVisibility(View.GONE);
                 }
                 view.loadUrl(url);
 
@@ -157,42 +158,43 @@ public class DriverLoginActivity extends AppCompatActivity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/web/driverlogin"))
+                /*if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/web/driverlogin"))
                 {
-                    if (progressBar.isShowing()) {
-                        progressBar.dismiss();
-                    }
-                }
+
+                }*/
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                //if (progressBar.isShowing()) {
-                //  progressBar.dismiss();
-                //}
+
                 if (url.contains("redirect")) {
-                    if (progressBar.isShowing()) {
-                        progressBar.dismiss();
-                    }
-
-                    view.loadUrl("https://empirecouriers.willowit.net.au:8443/web/driverlogin");
+                   view.loadUrl("https://empirecouriers.willowit.net.au:8443/web/driverlogin");
                 }else if(url.contains("https://empirecouriers.willowit.net.au:8443/driver/web?#action=driver.ui")){
-                   // camera.setVisibility(View.VISIBLE);
 
-                    if (progressBar.isShowing()) {
-                        progressBar.dismiss();
-                    }
                     barcodeView.pause();
                 }
-                //else if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/driver/web?")){
-                //progressBar = ProgressDialog.show(ContinuousCaptureActivity.this, "", "Loading...");
-                //}
+
             }
         });
-        //if(isNetworkAvailable()) {
-          //  progressBar = ProgressDialog.show(DriverLoginActivity.this, "", "Loading...");
-        //} //xin dai ma
-        progressBar = ProgressDialog.show(DriverLoginActivity.this, "", "Loading...");
+
+        pg1= findViewById(R.id.progressBar1);
+
+        browserTest.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                // TODO 自动生成的方法存根
+
+                if(newProgress==100){
+                    pg1.setVisibility(View.GONE);//加载完网页进度条消失
+                }
+                else{
+                    pg1.setVisibility(View.VISIBLE);//开始加载网页时显示进度条
+                    pg1.setProgress(newProgress);//设置进度值
+                }
+
+            }
+        });
+
         browserTest.loadUrl("https://empirecouriers.willowit.net.au:8443/driver/web?");
 
     }
@@ -221,53 +223,8 @@ public class DriverLoginActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menuaction, menu);
         return true;
     }
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();//Add permission of ACCESS_NETWORK_STATE
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }//xin dai ma
 
-    public void receivedLabel2(View view) {
-        Log.d("test", "Scan button Starts to work!");
 
-        if (barcodeView.getVisibility() == barcodeView.VISIBLE) {
-
-            //TO add
-            barcodeView.pause();
-
-            barcodeView.setVisibility(View.GONE);
-
-            light.setVisibility(View.GONE);
-
-        } else {
-
-            if(isTorchOn == true) {
-                //barcodeView.setTorchOff();
-                isTorchOn = false;
-            }
-            light.setVisibility(View.VISIBLE);
-
-            lastText = "";//To allow scan again same label
-            //TO add
-            barcodeView.resume();
-
-            //browserTest.setLayoutParams(new ViewGroup.LayoutParams(200, 400));
-
-            barcodeView.setVisibility(View.VISIBLE);
-
-            //barcodeView.decodeContinuous(callback);
-
-            String scriptForBlur = "document.getElementsByTagName('input')[0].blur();";
-
-            //String script = "var inputEle = document.getElementsByTagName('input')[0];var event1 = document.createEvent('HTMLEvents');  event1.initEvent('change', true, true); event1.eventType = 'change'; inputEle.dispatchEvent(event1);";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                browserTest.evaluateJavascript(scriptForBlur, null);
-            } else {
-                browserTest.loadUrl("javascript:" + scriptForBlur);
-            }
-        }//end else
-    }
 
     @Override
     protected void onResume() {
@@ -291,21 +248,6 @@ public class DriverLoginActivity extends AppCompatActivity {
         barcodeView.resume();
     }
 
-    //TO add
-    //One button for light
-    public void torchOnOff(View view) {
-
-        isTorchOn = !isTorchOn;
-        if(isTorchOn == true) {
-            barcodeView.setTorchOn();
-        }else
-        {
-            barcodeView.setTorchOff();
-        }
-    }
-
-
-
     public void triggerScan(View view) {
         barcodeView.decodeSingle(callback);
     }
@@ -319,11 +261,6 @@ public class DriverLoginActivity extends AppCompatActivity {
     private void receivedLabel_menu() {
         Log.d("test", "Scan button Starts to work!");
 
-        //barcodeView = (DecoratedBarcodeView) findViewById(R.id.barcode_scanner);
-        //barcodeView.setVisibility(View.GONE);
-        //Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.UPC_A, BarcodeFormat.EAN_13);
-
-        //barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
         if (barcodeView.getVisibility() == barcodeView.VISIBLE) {
 
             //TO add
@@ -340,13 +277,10 @@ public class DriverLoginActivity extends AppCompatActivity {
                 menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.flash_off));
                 isTorchOn = false;
             }
-            //light.setVisibility(View.VISIBLE);
 
             lastText = "";//To allow scan again same label
             //TO add
             barcodeView.resume();
-
-            //browserTest.setLayoutParams(new ViewGroup.LayoutParams(200, 400));
 
             barcodeView.setVisibility(View.VISIBLE);
 
@@ -362,7 +296,7 @@ public class DriverLoginActivity extends AppCompatActivity {
             }
 
         }
-    }//end else
+    }
 
         //For menu action
         public void torchOnOff_menu() {

@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
+
 import org.apache.http.util.EncodingUtils;
 
 import java.net.URLEncoder;
@@ -23,6 +27,7 @@ public class TrackActivity extends AppCompatActivity {
 
     WebView browser; //Public or Private
     private static final String URL_STRING = "https://empirecouriers.willowit.net.au:8443/parcel_track_details";
+    private ProgressBar pg1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,17 +47,34 @@ public class TrackActivity extends AppCompatActivity {
 
         Collection<Map.Entry<String, String>> postData1 = mapParams.entrySet();
 
-        browser.setWebViewClient(new WebViewClient() {
+        /*browser.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 return (true);
             }
+        });*/
+
+        pg1= findViewById(R.id.progressBar1);
+
+        browser.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                // TODO 自动生成的方法存根
+
+                if(newProgress==100){
+                    pg1.setVisibility(View.GONE);//加载完网页进度条消失
+                }
+                else{
+                    pg1.setVisibility(View.VISIBLE);//开始加载网页时显示进度条
+                    pg1.setProgress(newProgress);//设置进度值
+                }
+
+            }
         });
 
         webview_ClientPost(browser, "https://empirecouriers.willowit.net.au:8443/parcel_track_details", postData1);
         //String postDataW = "parcel_num=" + message;
-        //String postDataW = "fileContents=" + URLEncoder.encode(message, "UTF-8");
         //browser.postUrl(URL_STRING, EncodingUtils.getBytes(postDataW, "BASE64"));
 
     }
@@ -85,78 +107,3 @@ public class TrackActivity extends AppCompatActivity {
     }
 
 }
-
-/*
-public class TrackActivity extends Activity implements AdvancedWebView.Listener {
-    private WebView mWebView;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_track);
-
-        Intent intent = getIntent();
-        String message = intent.getStringExtra(MainActivity.LABEL_NUMBER);
-
-
-        mWebView = (AdvancedWebView) findViewById(R.id.webkit);
-        mWebView.setListener(this, this);
-        final String myBaseUrl = "https://empirecouriers.willowit.net.au:8443/";
-        mWebView.loadHtml(message, myBaseUrl);
-
-        //mWebView.loadUrl("https://empirecouriers.willowit.net.au:8443/web/driverlogin");
-
-        // ...
-    }
-    @SuppressLint("NewApi")
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mWebView.onResume();
-        // ...
-    }
-
-    @SuppressLint("NewApi")
-    @Override
-    protected void onPause() {
-        mWebView.onPause();
-        // ...
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        mWebView.onDestroy();
-        // ...
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        mWebView.onActivityResult(requestCode, resultCode, intent);
-        // ...
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!mWebView.onBackPressed()) { return; }
-        // ...
-        super.onBackPressed();
-    }
-
-    @Override
-    public void onPageStarted(String url, Bitmap favicon) { }
-
-    @Override
-    public void onPageFinished(String url) { }
-
-    @Override
-    public void onPageError(int errorCode, String description, String failingUrl) { }
-
-    @Override
-    public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) { }
-
-    @Override
-    public void onExternalPageRequest(String url) { }
-}*/
