@@ -140,6 +140,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                 if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/driver/web?")){
                     Log.d("DRIVER", "Log in with existing credentials");
 
+
                 } else if(url.equalsIgnoreCase("https://empirecouriers.willowit.net.au:8443/web/driverlogout")){
                     if (barcodeView.getVisibility() == barcodeView.VISIBLE) {
 
@@ -148,7 +149,10 @@ public class DriverLoginActivity extends AppCompatActivity {
 
                         barcodeView.setVisibility(View.GONE);
 
+
                     }
+                    menu.getItem(0).setVisible(false);
+                    menu.getItem(1).setVisible(false);
 
                 }
                 view.loadUrl(url);
@@ -168,9 +172,12 @@ public class DriverLoginActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
 
                 if (url.contains("redirect")) {
+                    menu.getItem(0).setVisible(false);
+                    menu.getItem(1).setVisible(false);
                    view.loadUrl("https://empirecouriers.willowit.net.au:8443/web/driverlogin");
                 }else if(url.contains("https://empirecouriers.willowit.net.au:8443/driver/web?#action=driver.ui")){
-
+                    menu.getItem(0).setVisible(true);
+                    menu.getItem(1).setVisible(true);
                     barcodeView.pause();
                 }
 
@@ -221,6 +228,8 @@ public class DriverLoginActivity extends AppCompatActivity {
         this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menuaction, menu);
+        menu.getItem(0).setVisible(false);
+        menu.getItem(1).setVisible(false);
         return true;
     }
 
@@ -313,6 +322,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                 if(barcodeView.getVisibility() == barcodeView.VISIBLE)
                 {
                     menu.getItem(1).setIcon(ContextCompat.getDrawable(this, R.drawable.flash_off));
+
                 }
 
                 barcodeView.setTorchOff();
